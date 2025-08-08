@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>在线编辑器</title>
+    <link type="text/css" rel="stylesheet" href="./style.css">
+    <script type="text/javascript" src="../xcom/common.js"></script>
+    <script type="text/javascript" src="../xcom/localforage.min.js"></script>
+
+    <script type="module">
+        import {AiEditor} from './index.js'
+
+        let uploadHost    = localStorage.getItem('spf_app_upload_host')+'/resource/oss/upload';
+        let editorTheme   = localStorage.getItem("arco-theme")==="dark"?"dark":"light";
+        let editorLang    = localStorage.getItem("arco-locale")==="zh-CN"?"zh":"en";
+
+        let aieditor = new AiEditor({
+            element: "#aiEditor",
+            theme: editorTheme,
+            lang: editorLang,
+            toolbarKeys: ["undo", "redo", "brush", "eraser",
+                "|", "heading", "font-family", "font-size",
+                "|", "bold", "italic", "underline", "strike", "link", "code", "subscript", "superscript", "hr", "todo", "emoji",
+                "|", "highlight", "font-color",
+                "|", "align", "line-height",
+                "|", "bullet-list", "ordered-list", "indent-decrease", "indent-increase", "break",
+                "|", "image", "video",  "quote", "code-block", "table",
+                "|", "printer", "fullscreen", "ai"
+            ],
+            image: {
+                allowBase64:true,
+                defaultSize:350,
+                uploadUrl: uploadHost,
+                uploadHeaders: {
+                    "Authorization":localStorage.getItem("spf_token"),
+                    "Clientid":localStorage.getItem("spf_client_id")
+                },
+                uploader: (file, uploadUrl, headers, formName) => {
+                    if(isTempEdit !== "true"){
+                        const formData = new FormData();
+                        formData.append("file", file);
+                        return new Promise((resolve, reject) => {
+                            fetch(uploadUrl, {
+                                method: "post",
+                                headers: {'Accept': 'application/json', ...headers},
+                                body: formData,
+                            }).then((resp) => resp.json())
+                                .then(json => {
+                                    console.log(json);
+                                    if(json.code===200){
+                                        let rtJSON = {"errorCode":0,"data":{"src":json.data.url,"alt":json.data.fileName}};
+                                        console.log("upload.image.rtJson="+rtJSON);
+                                        resolve(rtJSON);
+                                    }
+
+                                }).catch((error) => {
+                                reject(error);
+                            })
+                        });
+                    }
+
+                },
+            },
+
+            video: {
+                uploadUrl: uploadHost,
+                uploadHeaders: {
+                    "Authorization":localStorage.getItem("spf_token"),
+                    "Clientid":localStorage.getItem("spf_client_id")
+                },
+                uploader: (file, uploadUrl, headers, formName) => {
+
+                    if(isTempEdit !== "true"){
+                        const formData = new FormData();
+                        formData.append("file", file);
+                        return new Promise((resolve, reject) => {
+                            fetch(uploadUrl, {
+                                method: "post",
+                                headers: {'Accept': 'application/json', ...headers},
+                                body: formData,
+                            }).then((resp) => resp.json())
+                                .then(json => {
+                                    console.log(json);
+                                    if(json.code===200){
+                                        let rtJSON = {"errorCode":0,"data":{"src":json.data.url,"poster":""}};
+                                        console.log("upload.video.rtJson="+rtJSON);
+                                        resolve(rtJSON);
+                                    }
+
+                                }).catch((error) => {
+                                reject(error);
+                            })
+                        });
+                    }
+                    }
+
+            },
+            placeholder: "点击输入内容...",
+            content: isTempEdit!=="true"?window.parent.getInitContent():"",
+            onMentionQuery: (query) => {
+                return [
+                    'Michael Yang', 'Jean Zhou', 'Tom Cruise', 'Madonna', 'Jerry Hall', 'Joan Collins', 'Winona Ryder'
+                    , 'Christina Applegate', 'Alyssa Milano', 'Molly Ringwald', 'Ally Sheedy', 'Debbie Harry', 'Olivia Newton-John'
+                    , 'Elton John', 'Michael J. Fox', 'Axl Rose', 'Emilio Estevez', 'Ralph Macchio', 'Rob Lowe', 'Jennifer Grey'
+                    , 'Mickey Rourke', 'John Cusack', 'Matthew Broderick', 'Justine Bateman', 'Lisa Bonet',
+                ].filter(item => item.toLowerCase().startsWith(query.toLowerCase())).slice(0, 5)
+            },
+            ai: {
+                models: {
+                    spark: {
+                        appId: "ff190c10",
+                        apiKey: "ecdd61b14f8dea6508f02e4a76735722",
+                        apiSecret: "NjBhNjdlNTE5MTEwZDU1N2JmZDA5MTc4",
+                    }
+                }
+            },
+        })
+
+
+        // ####################################
+        // ############# 自定义部分 BEG##########
+        // 改变主题
+        function changeTheme(isDark) {
+            if (isDark) {
+                document.body.style.background = "#1a1b1e"
+                document.querySelector("#title").style.color = "#eee"
+                document.querySelector("#aiEditor").classList.remove("aie-theme-light");
+                document.querySelector("#aiEditor").classList.add("aie-theme-dark");
+            } else {
+                document.body.style.background = ""
+                document.querySelector("#title").style.color = ""
+                document.querySelector("#aiEditor").classList.remove("aie-theme-dark");
+                document.querySelector("#aiEditor").classList.add("aie-theme-light");
+            }
+        }
+
+        // 设置全屏
+        function fullScreen(){
+            document.getElementsByTagName("aie-fullscreen").item(0).click();
+        }
+
+        window.onload=function (){
+            setTimeout(function(){
+                // 设置默认全屏
+                fullScreen();
+
+                // 显示组件
+                $("#title").show();
+                $("#aiEditor").show();
+            },400);
+        }
+
+        // 不是临时编辑
+        if(isTempEdit !== "true"){
+            // 定时获取内容
+            setInterval(function(){
+                let fileContent = aieditor.getMarkdown();
+                window.parent.saveContentEvent(fileContent);
+            },3000);
+        }
+
+        // 同步编辑器主题及语言变动
+        setInterval(function(){
+
+            // 主题
+            let mainThemeNow = localStorage.getItem("arco-theme")==="dark"?"dark":"light";
+            if(editorTheme !== mainThemeNow){
+                console.log("主题发生变化:"+mainThemeNow);
+                if("dark"===mainThemeNow){
+                    changeTheme(true);
+                }else{
+                    changeTheme(false);
+                }
+                editorTheme=mainThemeNow;
+            }
+
+            // 语言
+            let mainLangNow = localStorage.getItem("arco-locale")==="zh-CN"?"zh":"en";
+            if(editorLang !== mainLangNow){
+                if (mainLangNow === "en"){
+                    aieditor.changeLang("en");
+                    localStorage.setItem("lang","en");
+                }else {
+                    aieditor.changeLang("zh");
+                    localStorage.setItem("lang","zh");
+                }
+                editorLang = mainLangNow;
+                setTimeout(function(){
+                    fullScreen();
+                },200);
+
+            }
+        },500);
+
+    </script>
+</head>
+<body>
+
+<div style="padding: 0px 0px;font-size: 30px;display: none" id="title">
+</div>
+
+<div id="aiEditor" style="height: 550px; width: 800px; margin: 0px;display: none"></div>
+
+</body>
+</html>

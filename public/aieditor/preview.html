@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>在线编辑器</title>
+    <link type="text/css" rel="stylesheet" href="./style.css">
+    <script type="text/javascript" src="../xcom/common.js"></script>
+    <script type="text/javascript" src="../xcom/localforage.min.js"></script>
+
+    <script type="module">
+        import {AiEditor} from './index.js'
+
+        let aieditor = new AiEditor({
+            element: "#aiEditor",
+            theme: "dark",
+            toolbarKeys: ["undo", "redo", "brush", "eraser",
+                "|", "heading", "font-family", "font-size",
+                "|", "bold", "italic", "underline", "strike", "link", "code", "subscript", "superscript", "hr", "todo", "emoji",
+                "|", "highlight", "font-color",
+                "|", "align", "line-height",
+                "|", "bullet-list", "ordered-list", "indent-decrease", "indent-increase", "break",
+                "|", "image", "video",  "quote", "code-block", "table",
+                "|", "printer", "fullscreen", "ai"
+            ],
+            placeholder: "点击输入内容...",
+            editable:false,
+            content: window.parent.getInitContent(),
+            onMentionQuery: (query) => {
+                return [
+                    'Michael Yang', 'Jean Zhou', 'Tom Cruise', 'Madonna', 'Jerry Hall', 'Joan Collins', 'Winona Ryder'
+                    , 'Christina Applegate', 'Alyssa Milano', 'Molly Ringwald', 'Ally Sheedy', 'Debbie Harry', 'Olivia Newton-John'
+                    , 'Elton John', 'Michael J. Fox', 'Axl Rose', 'Emilio Estevez', 'Ralph Macchio', 'Rob Lowe', 'Jennifer Grey'
+                    , 'Mickey Rourke', 'John Cusack', 'Matthew Broderick', 'Justine Bateman', 'Lisa Bonet',
+                ].filter(item => item.toLowerCase().startsWith(query.toLowerCase())).slice(0, 5)
+            },
+            ai: {
+                models: {
+                    spark: {
+                        appId: "ff190c10",
+                        apiKey: "ecdd61b14f8dea6508f02e4a76735722",
+                        apiSecret: "NjBhNjdlNTE5MTEwZDU1N2JmZDA5MTc4",
+                    }
+                }
+            },
+        })
+
+
+        window.onload=function (){
+
+            setTimeout(function(){
+
+                // 设置默认全屏
+                $("aie-fullscreen:first").click();
+                $("aie-header").hide();
+                $("aie-footer").hide();
+
+                // 显示组件
+                $("#title").show();
+                $("#aiEditor").show();
+
+            },300);
+
+        }
+
+    </script>
+</head>
+<body>
+
+<div style="padding: 0px 0px;font-size: 30px;display: none" id="title">
+</div>
+
+<div id="aiEditor" style="height: 100%; width: 100%; margin: 0px;display: none"></div>
+
+</body>
+</html>

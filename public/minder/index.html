@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width,user-scalable=no,initial-scale=1,maximum-scale=1,minimum-scale=1">
+    <link rel="icon" href="dist-root/logo.ico">
+    <title>思绪思维导图</title>
+    <script>
+        // 自定义静态资源的路径
+        window.externalPublicPath = './dist-root/';
+
+        // 接管应用
+        window.takeOverApp = true;
+    </script>
+    <link href="dist-root/css/chunk-vendors.css?53dd58ba85b8b86b6a5a" rel="stylesheet">
+    <link href="dist-root/css/app.css?53dd58ba85b8b86b6a5a" rel="stylesheet">
+    <script type="text/javascript" src="../xcom/common.js"></script>
+    <script type="text/javascript" src="../xcom/editor.init.data.js"></script>
+</head>
+<body>
+<div id="app"></div>
+<script>const getDataFromBackend = () => {
+    return new Promise((resolve, reject) => {
+        setTimeout(() => {
+            resolve({
+                mindMapData: isTempEdit!=="true"?window.parent.getInitContent():minderInitData,
+                lang: 'zh',
+                localConfig: null
+            })
+        }, 300)
+    })
+}
+const setTakeOverAppMethods = (data) => {
+    window.takeOverAppMethods = {}
+    // 获取思维导图数据的函数
+    window.takeOverAppMethods.getMindMapData = () => {
+        return data.mindMapData
+    }
+    // 保存思维导图数据的函数
+    window.takeOverAppMethods.saveMindMapData = (data) => {
+        // 不是临时编辑
+        if(isTempEdit !== "true"){
+            const content = JSON.stringify(data);
+            window.parent.saveContentEvent(content);
+        }
+    }
+    // 获取语言的函数
+    window.takeOverAppMethods.getLanguage = () => {
+        return data.lang
+    }
+    // 保存语言的函数
+    window.takeOverAppMethods.saveLanguage = (lang) => {
+        console.log(lang)
+    }
+    // 获取本地配置的函数
+    window.takeOverAppMethods.getLocalConfig = () => {
+        return data.localConfig
+    }
+    // 保存本地配置的函数
+    window.takeOverAppMethods.saveLocalConfig = (config) => {
+        console.log(config)
+    }
+}
+window.onload = async () => {
+    if (!window.takeOverApp) return;
+    let data;
+
+    // 请求数据
+    if(isTempEdit !== "true") {
+        data = await getDataFromBackend()
+    }else{
+        data = {
+            "mindMapData": minderInitData,
+            "lang": 'zh',
+            "localConfig": null
+        }
+    }
+
+    // 设置全局的方法
+    setTakeOverAppMethods(data);
+
+    // 思维导图实例创建完成事件
+    window.$bus.$on('app_inited', (mindMap) => {
+        console.log(mindMap)
+    })
+    // 可以通过window.$bus.$on()来监听应用的一些事件
+    // 实例化页面
+    window.initApp()
+
+}</script>
+<script src="dist-root/js/chunk-vendors.js?53dd58ba85b8b86b6a5a"></script>
+<script src="dist-root/js/app.js?53dd58ba85b8b86b6a5a"></script>
+</body>
+</html>

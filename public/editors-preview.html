@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="myApp" ng-controller="myCtrl">
+<head>
+    <meta charset="UTF-8">
+    <title>{{fileName}}</title>
+    <link rel="stylesheet" href="./xcom/bootstrap.min.css">
+    <link rel="stylesheet" href="./editors.css">
+    <script type="text/javascript" src="./xcom/common.js"></script>
+    <script type="text/javascript" src="./xcom/angular.min.js"></script>
+    <script  src="./xcom/localforage.min.js"></script>
+    <script  src="./xcom/index.db.util.js"></script>
+    <script  src="./xcom/editor.init.data.js"></script>
+    <script  src="./editors-preview.js"></script>
+</head>
+
+<body style="background-color: #1e2022">
+<header class="header" style="display: none" id="statusBar" >
+    <div class="input-group w-50">
+        <input type="text" oninput="rename(this)"  class="form-control fileName" ng-model="fileName" placeholder="文件名称" aria-label="文件名称" aria-describedby="basic-addon2">
+        <span class="input-group-text remainTip"  id="basic-addon2">{{remainTip}}</span>
+    </div>
+</header>
+<main class="main">
+    <iframe id="editorIframe"
+            scrolling="no"
+            frameborder="0"
+            width="100%"
+            src="{{editorURL}}"
+            style="visibility: hidden"
+    >
+    </iframe>
+</main>
+
+<script type="text/javascript" src="./xcom/bootstrap.bundle.min.js"></script>
+<script type="text/javascript" src="./xcom/crypto.core.js"></script>
+<script type="text/javascript" src="./xcom/crypto.sha256.js"></script>
+</body>
+
+</html>

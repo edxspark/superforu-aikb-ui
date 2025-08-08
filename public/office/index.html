@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>在线office</title>
+</head>
+<body>
+<div id="placeholder" style="height: 100%"></div>
+<script type="text/javascript" src="http://129.211.0.166/web-apps/apps/api/documents/api.js"></script>
+<script type="text/javascript" src="../xcom/common.js"></script>
+<script>
+    // 配置参数
+    const fileUUID = getParamValueByName("fileUUID");
+    spfTk = localStorage.getItem("spf_token");
+    clientId = localStorage.getItem("spf_client_id");
+    const appServerHost = localStorage.getItem("spf_app_server_host");
+
+    // 获取文件信息
+    const fileId = fileUUID.substring(fileUUID.lastIndexOf("_")+1);
+    const res = myGet(appServerHost+"/api/kb/folderFile/"+fileId,null,false);
+    const fileType = res.data.linkFileTypeCode;
+    let documentType = "";
+    let fileName = "";
+    let officeURL = localStorage.getItem("spf_office_template_url");
+
+    if(fileType==="docx"){
+        fileName ="word.docx";
+        officeURL+="/blank/"+fileName;
+        console.log(officeURL);
+        documentType="text";
+    }else if(fileType==="xlsx"){
+        fileName = "excel.xlsx";
+        officeURL+="/blank/"+fileName;
+        documentType="spreadsheet";
+    }else if(fileType==="pptx"){
+        fileName = "ppt.pptx";
+        officeURL+="/blank/"+fileName;
+        documentType="presentation";
+    }
+
+
+    // 打开在线office
+    const viewportHeight = window.innerHeight-10;
+    let config = {
+        "width": '100% by default',
+        "height": viewportHeight,
+        "document": {
+            "fileType": fileType,
+            "key": fileUUID,
+            "type": "desktop",
+            "title": "自动实时保存...",
+            "url": officeURL
+        },
+        "documentType": documentType,
+        "editorConfig":{
+            "lang": "zh-CN"
+        }
+    };
+    var docEditor = new DocsAPI.DocEditor("placeholder", config);
+
+</script>
+</body>
+</html>
