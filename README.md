@@ -1,20 +1,15 @@
-## Superforu 前端主应用
+## Superforu AIKB 前端主应用
 
 本项目的技术栈为 vue + ES2015 + TypeScript + Arco Design 和 echarts等
 
 ## 运行程序
-
-开发环境:
-
 ```bash
 
 yarn install
 yarn dev
 ```
-
-切换国内源：  
-yarn config set registry https://registry.npmmirror.com  
-
+国内加速源：  
+yarn config set registry https://registry.npmmirror.com
 
 访问： [http://localhost:5173](http://localhost:5173) 
 
@@ -47,6 +42,14 @@ localStorage.setItem('spf_user_info', JSON.stringify(spfUserInfo));
 
 ## 目录结构
 ``` markdown
+├── config 配置文件目录
+├── public
+│   ├── aieditor    Markdown编辑器
+│   ├── flowchat    流程图编辑器
+│   ├── kmroadmap   知识地图编辑器
+│   ├── minder      思维导图编辑器
+│   ├── office      在线office编辑器
+│   ├── whiteboard  在线白板编辑器
 ├── README.md
 ├── package.json
 ├── index.html
